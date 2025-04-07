@@ -1,0 +1,15 @@
+{
+	"recommendations": [
+		"aaron-bond.better-comments",
+		"davidanson.vscode-markdownlint",
+		"humao.rest-client",
+		"rust-lang.rust-analyzer",
+		"tamasfe.even-better-toml",
+		"timonwong.shellcheck",
+		"usernamehw.errorlens",
+		"vadimcn.vscode-lldb",
+		"kejun.markdown-alert",
+		"yzhang.markdown-all-in-one",
+		"fill-labs.dependi"
+	]
+}

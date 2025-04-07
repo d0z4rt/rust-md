@@ -1,0 +1,116 @@
+{
+	"files.eol": "\n",
+	"editor.tabSize": 2,
+	"npm.packageManager": "pnpm",
+	"explorer.excludeGitIgnore": false,
+	"workbench.localHistory.exclude": {
+		"**/.output/**": true,
+		"**/target/**": true,
+		"**/dist/**": true
+	},
+	"explorer.autoRevealExclude": {
+		"**/.output/**": true,
+		"**/target/**": true,
+		"**/dist/**": true
+	},
+	"files.watcherExclude": {
+		"**/.output/**": true,
+		"**/target/**": true,
+		"**/dist/**": true
+	},
+	"search.followSymlinks": false,
+	"emmet.includeLanguages": {
+		"javascript": "javascriptreact",
+		"typescript": "typescriptreact"
+	},
+	"typescript.preferences.importModuleSpecifier": "relative",
+	"files.associations": {
+		"*.env.local": "env",
+		"*.env.example": "env",
+		"*.mdx": "markdown"
+	},
+	"editor.formatOnSave": true,
+	"editor.bracketPairColorization.enabled": true,
+	"terminal.integrated.fontFamily": "BlexMono Nerd Font Mono",
+	"terminal.integrated.fontSize": 12,
+	"cSpell.diagnosticLevel": "Hint",
+	"[rust]": {
+		"editor.defaultFormatter": "rust-lang.rust-analyzer",
+		"editor.formatOnSave": true // Optional
+	},
+	"rust-analyzer.check.command": "clippy",
+	"[markdown]": {
+		"editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+		"editor.unicodeHighlight.ambiguousCharacters": false,
+		"editor.unicodeHighlight.invisibleCharacters": true,
+		"diffEditor.ignoreTrimWhitespace": false,
+		"editor.wordWrap": "on",
+		"editor.quickSuggestions": {
+			"comments": "off",
+			"strings": "off",
+			"other": "off"
+		}
+	},
+	"markdown.validate.enabled": true,
+	"markdown.validate.fileLinks.markdownFragmentLinks": "error",
+	"markdown.validate.fileLinks.enabled": "error",
+	"markdown.validate.fragmentLinks.enabled": "error",
+	"markdown.copyFiles.destination": {
+		"**/*": "./apps/brain/assets/${fileName}"
+	},
+	"markdown.updateLinksOnFileMove.enabled": "always",
+	"markdown.occurrencesHighlight.enabled": false,
+	"markdown.suggest.paths.includeWorkspaceHeaderCompletions": "onSingleOrDoubleHash",
+	"markdown.updateLinksOnFileMove.enableForDirectories": true,
+	"markdown.extension.list.indentationSize": "inherit",
+	"markdown.extension.toc.slugifyMode": "github",
+	"[javascript]": {
+		"editor.defaultFormatter": "biomejs.biome",
+		"editor.codeActionsOnSave": {
+			"quickfix.biome": "explicit",
+			"source.organizeImports.biome": "explicit"
+		}
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "biomejs.biome",
+		"editor.codeActionsOnSave": {
+			"quickfix.biome": "explicit",
+			"source.organizeImports.biome": "explicit"
+		}
+	},
+	"[javascriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome",
+		"editor.codeActionsOnSave": {
+			"quickfix.biome": "explicit",
+			"source.organizeImports.biome": "explicit"
+		}
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome",
+		"editor.codeActionsOnSave": {
+			"quickfix.biome": "explicit",
+			"source.organizeImports.biome": "explicit"
+		}
+	},
+	"[scss]": {
+		"editor.suggest.insertMode": "replace",
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "biomejs.biome",
+		"editor.formatOnSave": true, // Optional
+		"editor.codeActionsOnSave": {
+			"quickfix.biome": "explicit",
+			"source.organizeImports.biome": "explicit"
+		}
+	},
+	"[json]": {
+		"editor.defaultFormatter": "biomejs.biome",
+		"editor.formatOnSave": true, // Optional
+		"editor.codeActionsOnSave": {
+			"quickfix.biome": "explicit",
+			"source.organizeImports.biome": "explicit"
+		}
+	},
+	"markdown.extension.toc.updateOnSave": false
+}

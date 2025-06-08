@@ -1,10 +1,12 @@
-use pulldown_cmark::{html::push_html, CowStr, Event, Options, Parser, Tag};
+use pulldown_cmark::{html::push_html, CowStr, Event, Options, Parser, Tag, TagEnd};
 use serde::{Deserialize, Serialize};
 use std::{
   collections::HashMap,
   fs,
   path::{Component, Path, PathBuf},
 };
+
+use crate::config::UserConfig;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Metadata {
@@ -35,6 +37,7 @@ pub fn markdown_to_html(
   file_name: &str,
   source_markdown: &str,
   _private_links: bool,
+  config: &UserConfig,
 ) -> anyhow::Result<(String, Metadata, Vec<Link>)> {
   // Extract metadata
   let metadata = markdown_to_metadata(source_markdown)?;
@@ -43,65 +46,119 @@ pub fn markdown_to_html(
   let mut options = Options::empty();
   options.insert(Options::ENABLE_YAML_STYLE_METADATA_BLOCKS);
   options.insert(Options::ENABLE_STRIKETHROUGH);
-  options.insert(Options::ENABLE_GFM);
+  // Disabled since it only enable blockquote but doesn't support blockquote title and as limited types of callouts
+  // options.insert(Options::ENABLE_GFM);
 
   // File links
   let mut links: Vec<Link> = Vec::new();
 
+  // used to check if we're in a link tag (inside the parser loop)
+  let mut in_link_tag = false; // used to check if we're in a link tag
+
   // Parse the Markdown content
   let parser = Parser::new_ext(source_markdown, options).map(|event| match event {
-    Event::Start(Tag::Link {
-      id,
-      link_type,
-      dest_url,
-      title,
-    }) => {
-      // TODO handle private files
-      let modified_url = if !dest_url.starts_with("http") && dest_url.ends_with(".md") {
-        let stripped_url = dest_url.trim_end_matches(".md").to_string();
-
-        let dest_file_path = resolve_relative_path(file_path, &dest_url)
-          .to_string_lossy()
-          .replace('\\', "/");
-
-        // Check if the file is a Markdown file
-        let dest_content = fs::read_to_string(&dest_file_path)
-          .map_err(|err| format!("Failed to read file '{}': {}", dest_file_path, err))
-          .unwrap_or("".to_string());
-
-        // Extract metadata
-        let dest_metadata = markdown_to_metadata(&dest_content).unwrap();
-
-        let dest_name = Path::new(&stripped_url)
-          .file_stem()
-          .and_then(|n| n.to_str())
-          .unwrap_or("")
-          .replace(" ", "%20");
-
-        // let absolute_path = clean_path(normalize_combined_path(file_path, &stripped_url));
-
-        // add the url to the file links
-        links.push(Link {
-          source: file_name.to_owned(),
-          target: dest_name.to_string(),
-          target_path: dest_file_path,
-          target_public: dest_metadata.public.or(Some(false)),
-        });
-
-        // Create a new owned string without the .md extension
-        CowStr::from(stripped_url)
-      } else {
-        dest_url
-      };
-      Event::Start(Tag::Link {
+    Event::Start(tag) => match tag {
+      Tag::Link {
         id,
         link_type,
-        dest_url: modified_url,
+        dest_url,
         title,
-      })
+      } => {
+        if !dest_url.starts_with("http") && dest_url.ends_with(".md") {
+          // Used to rewrite link text
+          in_link_tag = true;
+
+          let stripped_url = dest_url.trim_end_matches(".md").to_string();
+          let dest_file_path = resolve_relative_path(file_path, &dest_url)
+            .to_string_lossy()
+            .replace('\\', "/");
+
+          // Check if the file is a Markdown file
+          let dest_content = fs::read_to_string(&dest_file_path)
+            .map_err(|err| format!("Failed to read file '{}': {}", dest_file_path, err))
+            .unwrap_or("".to_string());
+
+          // Extract metadata
+          let dest_metadata = markdown_to_metadata(&dest_content).unwrap();
+          let dest_public = dest_metadata.public.unwrap_or(false);
+          let dest_name = Path::new(&stripped_url)
+            .file_stem()
+            .and_then(|n| n.to_str())
+            .unwrap_or("")
+            .replace(" ", "%20");
+
+          links.push(Link {
+            source: file_name.to_owned(),
+            target: dest_name,
+            target_path: dest_file_path,
+            target_public: Some(dest_public),
+          });
+
+          if !dest_public && !config.private.include {
+            return Event::Start(Tag::Link {
+              id,
+              link_type,
+              dest_url: CowStr::from("#"),
+              title: CowStr::from("private file"),
+            });
+          }
+          return Event::Start(Tag::Link {
+            id,
+            link_type,
+            dest_url: CowStr::from(stripped_url),
+            title,
+          });
+        }
+        Event::Start(Tag::Link {
+          id,
+          link_type,
+          dest_url,
+          title,
+        })
+      }
+      _ => Event::Start(tag),
+    },
+    Event::End(tag) => match tag {
+      TagEnd::Link {} => {
+        in_link_tag = false;
+        Event::End(tag)
+      }
+      _ => Event::End(tag),
+    },
+    Event::Text(s) => {
+      // If the last link was to a private file,
+      // prepend a lock icon to the text.
+      if in_link_tag
+        && !config.private.include
+        && !links
+          .last()
+          .map_or(false, |link| link.target_public.unwrap_or(false))
+      {
+        return Event::Text(CowStr::from(format!("{} {}", config.private.icon, s)));
+      }
+
+      Event::Text(s)
     }
     _ => event,
   });
+  // .map(|event| {
+  //   match &event {
+  //     Event::Start(tag) => println!("Start: {:?}", tag),
+  //     Event::End(tag) => println!("End: {:?}", tag),
+  //     Event::Html(s) => println!("Html: {:?}", s),
+  //     Event::InlineHtml(s) => println!("InlineHtml: {:?}", s),
+  //     Event::Text(s) => println!("Text: {:?}", s),
+  //     Event::Code(s) => println!("Code: {:?}", s),
+  //     Event::DisplayMath(s) => println!("DisplayMath: {:?}", s),
+  //     Event::InlineMath(s) => println!("Math: {:?}", s),
+  //     Event::FootnoteReference(s) => println!("FootnoteReference: {:?}", s),
+  //     Event::TaskListMarker(b) => println!("TaskListMarker: {:?}", b),
+  //     Event::SoftBreak => println!("SoftBreak"),
+  //     Event::HardBreak => println!("HardBreak"),
+  //     Event::Rule => println!("Rule"),
+  //   };
+  //   event
+  // });
 
   // Write to a new String buffer.
   let mut html_output = String::new();

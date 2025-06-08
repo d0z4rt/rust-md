@@ -1,3 +1,13 @@
+# Path to your markdown files, must be absolute.
 root_path: E:\GIT\rust-md\vault
+
+# A file is private when it does not contains a `public: true` tag in its front matter.
+private:
+  # Whether to include private files.
+  include: true
+  # Icon added in front of private links
+  icon: 🔒
+
+# Folders to ignore.
 ignore:
   - ignored

@@ -49,7 +49,7 @@ pub async fn watch_files(
 
             if path.extension().and_then(|ext| ext.to_str()) == Some("md") {
               println!(
-                "{} Update: {}",
+                "{} » Updating: {}",
                 "[watcher]".purple(),
                 format!("{}", path.display()).bold()
               );
@@ -64,19 +64,19 @@ pub async fn watch_files(
                 .replace(" ", "%20");
 
               let (html_output, metadata, links) =
-                parser::markdown_to_html(&file_path, &file_name, &content, false)?;
+                parser::markdown_to_html(&file_path, &file_name, &content, false, config)?;
 
               let converted_note = Note {
                 public: metadata.public.unwrap_or(false),
                 name: file_name.clone(),
                 slug: file_name.replace(" ", "%20"),
-                path: file_path,
+                path: file_path.clone(),
                 data: NoteData { metadata, links },
                 content: html_output,
               };
 
               let mut notes_guard = notes.lock().await;
-              notes_guard.insert(file_name.clone(), converted_note);
+              notes_guard.insert(file_path, converted_note);
             }
           }
         }
@@ -95,9 +95,9 @@ fn check_ignore_patterns(path: &Path, config: &UserConfig) -> bool {
     for ignore_pattern in &config.ignore {
       if dir_name.contains(ignore_pattern) {
         println!(
-          "{} Ignoring folder: {}",
+          "{} × Ignoring: {}",
           "[watcher]".purple(),
-          format!("{}", path.display()).bold()
+          format!("{}", path.display()).bright_black().bold()
         );
         return true; // Skip this folder
       }

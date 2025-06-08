@@ -1,7 +1,7 @@
 use crate::{
-  app::{NodeInfo, Note, NoteData},
+  app::{Note, NoteData},
   config::UserConfig,
-  parser::{self, Link},
+  parser,
 };
 use colored::Colorize;
 use std::{collections::HashMap, fs, path::PathBuf, sync::Arc};
@@ -10,10 +10,6 @@ use tokio::sync::Mutex;
 /// Recursively find all notes in the directory and its subdirectories
 pub async fn find_all_notes(
   dir: &PathBuf,
-  nodes: &mut Vec<NodeInfo>,
-  links: &mut Vec<Link>,
-  public_files_number: &mut i32,
-  private_files_number: &mut i32,
   notes: Arc<Mutex<HashMap<String, Note>>>,
   config: &UserConfig,
 ) -> Result<(), String> {
@@ -32,23 +28,22 @@ pub async fn find_all_notes(
         let dir_name = dir_name.to_string_lossy().to_string();
         if config.ignore.contains(&dir_name) {
           println!(
-            "⤷ Ignoring folder: {}",
-            format!("{}", path.display()).bold()
+            "{} {}",
+            "× Ignoring folder:".bright_black(),
+            format!("{}", path.display()).bright_black().bold()
           );
           continue; // Skip this folder
         }
       }
 
-      // Recursively search subdirectories
-      let recursive_call = find_all_notes(
-        &path,
-        nodes,
-        links,
-        public_files_number,
-        private_files_number,
-        notes.clone(),
-        config,
+      println!(
+        "{} {}",
+        "» Scanning folder:".bright_black(),
+        format!("{}", path.display()).bright_black().bold()
       );
+
+      // Recursively search subdirectories
+      let recursive_call = find_all_notes(&path, notes.clone(), config);
       Box::pin(recursive_call).await?;
 
     // *  If the entry is a file, process it
@@ -76,34 +71,16 @@ pub async fn find_all_notes(
         .replace(" ", "%20");
 
       // Parse Markdown content and extract links
-      let (html_output, metadata, note_links) =
-        parser::markdown_to_html(full_path, &file_name, &content, false).map_err(|err| {
-          format!(
-            "Failed to convert to markdown '{}': {}",
-            path.display(),
-            err
-          )
-        })?;
-
-      let mut file_public = false;
-
-      // Parse the frontmatter to check if the note is public
-      if metadata.public == Some(true) {
-        file_public = true;
-        *public_files_number += 1;
-      } else {
-        *private_files_number += 1;
-      }
-
-      nodes.push(NodeInfo {
-        id: file_name.clone(),
-        public: file_public,
-        path: absolute_path.clone(),
-        r#type: "note".to_string(), // You can customize this based on frontmatter
-      });
-
-      // ! Extract links from the note
-      links.extend(note_links.clone());
+      let (html_output, metadata, note_links) = parser::markdown_to_html(
+        full_path, &file_name, &content, false, config,
+      )
+      .map_err(|err| {
+        format!(
+          "Failed to convert to markdown '{}': {}",
+          path.display(),
+          err
+        )
+      })?;
 
       // Store the converted note in the HashMap
       let converted_note = Note {
@@ -119,7 +96,7 @@ pub async fn find_all_notes(
       };
 
       let mut notes_guard = notes.lock().await;
-      notes_guard.insert(file_name.clone(), converted_note);
+      notes_guard.insert(path_str, converted_note);
     }
   }
 

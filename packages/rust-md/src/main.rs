@@ -51,27 +51,15 @@ async fn main() {
 
   // Perform initial conversion
   let root_path_buf = PathBuf::from(&config.root_path);
-  let mut nodes = Vec::new();
-  let mut links = Vec::new();
-  let mut public_files_number = 0;
-  let mut private_files_number = 0;
 
   println!("{}", "Indexing all files...".yellow().bold());
 
   let find_all_notes_start_time = std::time::Instant::now();
 
-  find_all_notes(
-    &root_path_buf,
-    &mut nodes,
-    &mut links,
-    &mut public_files_number,
-    &mut private_files_number,
-    notes.clone(),
-    &config,
-  )
-  .await
-  .map_err(|err| format!("Error while searching for files: {}", err))
-  .unwrap();
+  find_all_notes(&root_path_buf, notes.clone(), &config)
+    .await
+    .map_err(|err| format!("Error while searching for files: {}", err))
+    .unwrap();
 
   println!(
     "Indexed in: {}",

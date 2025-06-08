@@ -1,5 +1,5 @@
 use crate::{
-  parser::{self, Link, Metadata},
+  parser::{Link, Metadata},
   AppState,
 };
 use axum::{routing::get, Json, Router};
@@ -43,7 +43,6 @@ pub async fn create(state: AppState) -> Router {
   Router::new()
     .fallback(fallback)
     .route("/", get(get_default))
-    .route("/test", get(get_test))
     .route("/files", get(get_note_list))
     .route("/files/{*file_path}", get(get_note))
     .with_state(state)
@@ -52,25 +51,32 @@ pub async fn create(state: AppState) -> Router {
 
 /// axum handler for any request that fails to match the router routes.
 /// This implementation returns HTTP status code Not Found (404).
-pub async fn fallback(uri: axum::http::Uri) -> impl axum::response::IntoResponse {
-  (
-    axum::http::StatusCode::NOT_FOUND,
-    format!("No route {}", uri),
-  )
+#[derive(Serialize, Deserialize)]
+struct ErrorResponse {
+  status: String,
+  code: u16,
+  message: String,
+}
+async fn fallback(uri: axum::http::Uri) -> Json<ErrorResponse> {
+  Json(ErrorResponse {
+    status: "NOT_FOUND".to_string(),
+    code: axum::http::StatusCode::NOT_FOUND.as_u16(),
+    message: format!("No route {}", uri),
+  })
 }
 
 #[derive(Serialize, Deserialize)]
 struct DefaultResponse {
   status: String,
   code: i32,
-  infos: String,
+  message: String,
 }
 
 async fn get_default() -> Result<Json<DefaultResponse>, String> {
   let default_response = DefaultResponse {
     status: "OK".to_string(),
     code: 200,
-    infos: String::from("Welcome to rust-md, you can use: '/test' - '/files' - '/files/file_path'"),
+    message: String::from("Welcome to rust-md, you can use: '/files' - '/files/file_path'"),
   };
   Ok(Json(default_response))
 }
@@ -79,25 +85,6 @@ async fn get_default() -> Result<Json<DefaultResponse>, String> {
 struct TestResponse {
   id: String,
   html: String,
-}
-
-// Test using pulldown-cmark
-async fn get_test() -> Result<Json<TestResponse>, String> {
-  let md=
-  "---\ntitle: test\npublic: false\nauthor: me\n---\n# Hello\n\nHere's a [link](https://example.com).\n and an internal [link](./example.md)\n> [!WARNING]\n> Blockquote test";
-
-  let (html_output, _, _) =
-    parser::markdown_to_html(&String::from("/"), &String::from("file"), md, false).unwrap();
-  println!("\nHTML output:\n{}", html_output);
-  let metadata = parser::markdown_to_metadata(md).expect("Failed to extract meta");
-
-  println!("\nMETADATA output:\n{:?}", metadata);
-
-  let test_response = TestResponse {
-    id: "hello".to_string(),
-    html: html_output,
-  };
-  Ok(Json(test_response))
 }
 
 async fn get_note_list(
@@ -137,20 +124,13 @@ async fn get_note_list(
 async fn get_note(
   axum::extract::Path(file_path): axum::extract::Path<String>,
   axum::extract::State(state): axum::extract::State<AppState>,
-) -> Result<Json<Note>, String> {
+) -> Result<Json<Note>, Json<ErrorResponse>> {
   // ! DEBUG
   let start = std::time::Instant::now();
 
   let notes_guard = state.notes.lock().await;
 
-  // Keep only the file name
-  let file_name = file_path
-    .split('/')
-    .last()
-    .unwrap_or(&file_path)
-    .to_string();
-
-  if let Some(note) = notes_guard.get(&file_name) {
+  if let Some(note) = notes_guard.get(&file_path) {
     // ! DEBUG
 
     println!(
@@ -162,11 +142,19 @@ async fn get_note(
     );
 
     // ! HANDLE PRIVATE NOTES
-    if !note.public {
-      return Err("This file is private".to_string());
+    if !note.public && !state.config.private.include {
+      return Err(Json(ErrorResponse {
+        status: "FORBIDDEN".to_string(),
+        code: axum::http::StatusCode::FORBIDDEN.as_u16(),
+        message: format!("This file is private: {}", file_path),
+      }));
     }
     Ok(Json(note.clone()))
   } else {
-    Err("Note not found".to_string())
+    Err(Json(ErrorResponse {
+      status: "NOT_FOUND".to_string(),
+      code: axum::http::StatusCode::NOT_FOUND.as_u16(),
+      message: format!("This file does not exist: {}", file_path),
+    }))
   }
 }

@@ -1,8 +1,15 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PrivateConfig {
+  pub include: bool,
+  pub icon: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UserConfig {
   pub root_path: String,
+  pub private: PrivateConfig,
   pub ignore: Vec<String>,
 }
 

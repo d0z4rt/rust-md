@@ -112,5 +112,6 @@
 			"source.organizeImports.biome": "explicit"
 		}
 	},
-	"markdown.extension.toc.updateOnSave": false
+	"markdown.extension.toc.updateOnSave": false,
+	"files.trimTrailingWhitespace": true
 }

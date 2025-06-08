@@ -1,0 +1,7 @@
+- [x] instead of searching on a request, build the whole file structure when the app start, store it in memory and watch for file changes
+- [x] use pulldown_cmark instead of markdown-rs
+- [ ] handle file creation
+- [ ] handle file deletion
+- [ ] handle file renaming
+- [ ] proper tracing with tokio-trace
+- [ ] custom config path

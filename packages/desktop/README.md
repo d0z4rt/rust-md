@@ -1,0 +1,1 @@
+I plan to make a tauri app that can view and search through files, maybe even control the server and stay in systray while the server runs

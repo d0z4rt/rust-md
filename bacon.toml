@@ -1,12 +1,13 @@
 # This is a configuration file for the bacon tool
 #
 # Complete help on configuration: https://dystroy.org/bacon/config/
-# 
+#
 # You may check the current default at
 #   https://github.com/Canop/bacon/blob/main/defaults/default-bacon.toml
 
 default_job = "check"
 env.CARGO_TERM_COLOR = "always"
+env.CLICOLOR_FORCE = "1"
 
 [jobs.check]
 command = ["cargo", "check"]

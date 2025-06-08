@@ -1,0 +1,1 @@
+Solid app used as the UI for Desktop or in a browser

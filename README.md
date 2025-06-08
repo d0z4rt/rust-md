@@ -44,3 +44,9 @@ bacon run-long
 - <https://github.com/trashhalo/obsidian-rust-plugin/>
 - <https://markdowndb.com/>
 - <https://github.com/wooorm/markdown-rs>
+- <https://github.com/pulldown-cmark/pulldown-cmark/>
+  - <https://docs.rs/pulldown-cmark/latest/pulldown_cmark/>
+  - <https://pulldown-cmark.github.io/pulldown-cmark/>
+- Zola
+  - <https://github.com/getzola/zola/blob/master/components/libs/src/lib.rs>
+  - <https://github.com/getzola/zola/blob/c3a3d78dfddd34debf5254d293558e8fa045fd51/src/cmd/serve.rs#L45>

@@ -7,7 +7,8 @@ aliases:
   - Home page
 tags:
   - moc
-summary: 
+summary:
+author: yolo
 ---
 
 ![brain](/assets/brain_header.jpg)
@@ -26,3 +27,7 @@ summary:
 
 - [Readme](./README.md)
 - [Private](./PRIVATE_FILE.md)
+- [In sub folder](./subfolder/hello.md)
+- [In sub folder with spaces](<./subfolder/With Space.md>)
+- [deep](./subfolder/subsubfolder/deep.md)
+

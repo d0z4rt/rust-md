@@ -19,7 +19,7 @@ author: yolo
 > [!CAUTION]
 > Another callout
 
-> [!CAUTION]
+> [!CAUTION] title
 > > [!WARNING]
 > > nested callouts
 

@@ -1,1 +1,7 @@
-I plan to make a tauri app that can view and search through files, maybe even control the server and stay in systray while the server runs
+# Tauri + Solid + Typescript
+
+This template should help get you started developing with Tauri, Solid and Typescript in Vite.
+
+## Recommended IDE Setup
+
+- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)

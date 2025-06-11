@@ -1,0 +1,13 @@
+{
+  "name": "root",
+  "private": true,
+  "license": "GPL-3.0",
+  "scripts": { },
+  "devDependencies": {
+  },
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10"
+  },
+  "packageManager": "pnpm@10.11.0"
+}

@@ -11,3 +11,12 @@ private:
 # Folders to ignore.
 ignore:
   - ignored
+# root_path: E:\_WORK\_D0Z\DEV\d0z\apps\brain
+# ignore:
+#   - .obsidian
+#   - .mobile
+#   - .output
+#   - .trash
+#   - templates
+#   - node_modules
+#   - Rubbish
